@@ -9,7 +9,6 @@
 - [Phase 4: System Access](#phase-4-system-access)
 - [Phase 5: Deep Enumeration](#phase-5-deep-enumeration)
 - [Phase 6: Advanced Exploitation](#phase-6-advanced-exploitation)
-- [Attack Path Summary](#attack-path-summary)
 
 ---
 
