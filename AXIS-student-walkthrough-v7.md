@@ -1,5 +1,4 @@
 # AXIS Camera IoT Security CTF - Complete Student Walkthrough v7
-## Enhanced with Real-World Penetration Testing Methodology
 
 ## Table of Contents
 - [Initial Setup](#initial-setup)
