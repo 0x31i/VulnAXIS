@@ -1,4 +1,4 @@
-# AXIS Camera IoT Security CTF - Instructor Writeup
+# AXIS Camera IoT Security CTF - Instructor Writeup v6
 
 ## Table of Contents
 
@@ -141,7 +141,7 @@ which python python3 perl gcc make
 **Discovery Process**:
 ```bash
 # Method 1: Mount point analysis
-mount | grep -E '(rw|type tmpfs|type vfat)'
+mount | awk '$4 ~ /rw/ || $3 ~ /tmpfs|vfat/ {print}'
 
 # Method 2: Direct testing
 for dir in / /tmp /var /mnt /dev/shm /run /sys /proc /usr /opt /home; do
@@ -149,8 +149,8 @@ for dir in / /tmp /var /mnt /dev/shm /run /sys /proc /usr /opt /home; do
 done
 
 # Method 3: Filesystem examination
-df -h | grep -v 'Filesystem\|tmpfs'
-cat /proc/mounts | grep rw
+df -h | awk 'NR==1 || !/tmpfs/ {print}'
+cat /proc/mounts | awk '$4 ~ /rw/ {print}'
 ```
 
 **Teaching Nuance**: Not all "writable" locations are equally useful:
@@ -234,7 +234,7 @@ find /usr/local/axis -type f 2>/dev/null
 - Identification of related configuration items
 - Pattern recognition for future assessments
 
-**Why Not Grep**: While `grep -r "FLAG{" /` would find flags quickly, this approach:
+**Why Not Pattern Matching**: While `find / -type f -exec strings {} + | awk '/FLAG\{/' 2>/dev/null` would find flags quickly, this approach:
 - Doesn't teach file system navigation
 - Misses context around sensitive data
 - Doesn't develop pattern recognition
@@ -676,10 +676,10 @@ rescue_mode=enabled       # Recovery mode available
 ```bash
 # Check for JTAG configuration
 find /sys -name "*jtag*" 2>/dev/null
-dmesg | grep -i jtag
+dmesg | awk '/[jJ][tT][aA][gG]/ {print}'
 
 # Look for debug interfaces in hardware config
-cat /proc/cpuinfo | grep -i debug
+cat /proc/cpuinfo | awk 'tolower($0) ~ /debug/ {print}'
 cat /sys/kernel/debug/* 2>/dev/null
 ```
 
@@ -930,7 +930,7 @@ root@axis:~#
 
 ```bash
 # View mounted filesystems
-mount | grep rw
+mount | awk '$4 ~ /rw/ {print}'
 
 # Check disk usage and capacity
 df -h
@@ -960,7 +960,7 @@ tmpfs                    64.0M      2.0M     62.0M   3% /dev/shm
 
 ```bash
 # List all mount points showing read-write status
-mount | grep -E '(rw|type tmpfs|type vfat)'
+mount | awk '$4 ~ /rw/ || $3 ~ /tmpfs|vfat/ {print}'
 
 # Test write access to key directories
 for dir in /tmp /var /mnt/flash /dev/shm /run /sys/fs/cgroup /usr/local; do
@@ -1240,16 +1240,16 @@ Jan  1 12:00:25 axis-camera rtsp: RTSP server initialized
 **What Else to Look For in IoT Logs**:
 ```bash
 # Network configuration attempts
-cat /var/log/messages | grep -E "(network|eth0|wlan0)"
+cat /var/log/messages | awk '/network|eth0|wlan0/ {print}'
 
 # Authentication attempts
-cat /var/log/messages | grep -E "(auth|login|ssh|password)"
+cat /var/log/messages | awk '/auth|login|ssh|password/ {print}'
 
 # Service crashes or errors
-cat /var/log/messages | grep -E "(error|fail|crash|panic)"
+cat /var/log/messages | awk '/error|fail|crash|panic/ {print}'
 
 # Configuration changes
-cat /var/log/messages | grep -E "(config|conf|setting)"
+cat /var/log/messages | awk '/config|conf|setting/ {print}'
 ```
 
 **Real-World IoT Logging Patterns**:
@@ -1940,8 +1940,8 @@ cat /mnt/flash/factory_config.xml
 diff /mnt/flash/factory_config.xml /mnt/flash/current_config.xml
 
 # Check if backdoor account exists
-cat /etc/passwd | grep axis_support
-cat /etc/shadow | grep axis_support
+cat /etc/passwd | awk -F: '$1 == "axis_support" {print}'
+cat /etc/shadow | awk -F: '$1 == "axis_support" {print}'
 
 # Test backdoor credentials
 ssh axis_support@192.168.1.132
@@ -2237,7 +2237,7 @@ curl http://192.168.1.100 -u backup:BackupP@ss2024
 
 ```bash
 # Check when backup script runs
-cat /etc/crontabs/root | grep backup
+cat /etc/crontabs/root | awk '/backup/ {print}'
 
 # Review backup logs
 cat /var/lib/persistent/logs/backup.log
@@ -2469,7 +2469,7 @@ ftp 192.168.1.132
 # Password: BackupP@ss2024
 
 # Check for database service
-netstat -tulpn | grep -E "(3306|5432|27017)"
+netstat -tulpn | awk '$4 ~ /:3306|:5432|:27017/ {print}'
 
 # Test maintenance account
 ssh support@192.168.1.132
@@ -2480,13 +2480,13 @@ ssh support@192.168.1.132
 
 ```bash
 # Check for other encoded files
-find /var /mnt/flash /usr/local -type f -exec file {} \; | grep -i text | cut -d: -f1 | while read file; do
+find /var /mnt/flash /usr/local -type f -exec file {} \; | awk 'tolower($0) ~ /text/ {print $1}' | sed 's/:$//' | while read file; do
     echo "=== $file ==="
     cat "$file" | head -5
 done
 
 # Look for other encoding patterns
-find /var/lib/persistent -type f -exec sh -c 'cat "$1" | grep -E "^[A-Za-z0-9+/=]{20,}" | head -1' _ {} \; 2>/dev/null
+find /var/lib/persistent -type f -exec sh -c 'cat "$1" | awk "/^[A-Za-z0-9+\/=]{20,}/ {print; exit}"' _ {} \; 2>/dev/null
 ```
 
 **Teaching Exercise - Encoding Recognition**:
@@ -2849,7 +2849,7 @@ upnpc -s
 for pidfile in /run/axis/*.pid; do
     echo "=== $pidfile ==="
     cat "$pidfile"
-    ps aux | grep $(cat "$pidfile")
+    ps aux | awk -v pid=$(cat "$pidfile") '$2 == pid {print}'
 done
 
 # Examine socket files
@@ -2860,7 +2860,7 @@ file /run/axis/sockets/*
 watch -n 1 'ls -la /run/axis/'
 
 # Check for temporary credentials
-find /run -type f -exec sh -c 'cat "$1" | grep -E "(password|token|key|secret)" | head -5' _ {} \; 2>/dev/null
+find /run -type f -exec sh -c 'cat "$1" | awk "/password|token|key|secret/ {if(NR<=5) print}"' _ {} \; 2>/dev/null
 ```
 
 **Teaching Exercise**: Have students:
