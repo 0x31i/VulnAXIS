@@ -73,9 +73,10 @@ mkdir -p /usr/local/axis/lib
 mkdir -p /usr/local/axis/etc
 mkdir -p /usr/local/axis/share/scripts
 
-# cgroup directories (/sys/fs/cgroup)
-mkdir -p /sys/fs/cgroup/axis/camera.service
-mkdir -p /sys/fs/cgroup/axis/network.service
+# FIXED: cgroup directories - using writable /var/lib/axis/cgroup instead of /sys/fs/cgroup
+# The /sys/fs/cgroup is a kernel virtual filesystem and not writable like regular directories
+mkdir -p /var/lib/axis/cgroup/axis/camera.service
+mkdir -p /var/lib/axis/cgroup/axis/network.service
 
 echo "  [COMPLETE] Comprehensive directory structure created across all writable locations"
 
@@ -234,199 +235,212 @@ cat > /var/lib/persistent/system/licenses/vapix_pro.lic << 'EOF'
 # Issued: 2024-01-01
 
 [License_Info]
-product=VAPIX_Professional
-version=3.0
-license_type=perpetual
-issued_date=2024-01-01
-expiry_date=perpetual
+type=professional
+tier=enterprise
+features=all
 
-[Activation]
-# Activation code (ROT13): SYNT{NENTBEA79305394}
-activation_key=VF6K8M2P9HXLQC3R7BNVW4YT
-hardware_id=ACCC8E-M1025
-status=active
+[Validation]
+issued=2024-01-01
+expires=2025-12-31
+serial=VAPIX-PRO-FLAG{ARAGORN79305394}
 
-[Features]
-api_access=unlimited
-analytics=enabled
-cloud_integration=enabled
-multi_streaming=enabled
+[Authorized_Features]
+analytics=true
+recording=true
+ptz_control=true
+audio=true
+io_control=true
 EOF
-chmod 640 /var/lib/persistent/system/licenses/vapix_pro.lic
+chmod 644 /var/lib/persistent/system/licenses/vapix_pro.lic
 
-# Flag #5: Persistent SSH Keys (/var/lib/persistent/security/)
+# Flag #5: Persistent SSH Keys (/var/lib/persistent/)
 echo "[+] Flag #5: Persistent SSH Keys..."
 cat > /var/lib/persistent/security/keys/authorized_keys << 'EOF'
-# AXIS Camera - Persistent Authorized SSH Keys
-# Management access keys for remote support
+# AXIS Camera Authorized SSH Keys
+# Updated: 2024-01-01
+# Administrator keys for remote management
 
-# Production admin key - expires 2025-12-31
-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDGpxKjhkL... admin@axis-prod
+# Admin key - FLAG{BOROMIR73553172}
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC7admin...truncated...== admin@axis
 
-# Support team backup access - FLAG{BOROMIR73553172}
-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCxR8vhNmP... support@axis-backup
+# Maintenance key
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDmaint...truncated...== maintenance@axis
 
-# Monitoring service key
-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDR4vGhTqW... monitor@axis-service
+# Backup key
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCbbackup...truncated...== backup@axis
 EOF
 chmod 600 /var/lib/persistent/security/keys/authorized_keys
 
-# Flag #6: Recording Analytics Metadata (/var/cache/recorder/analytics/)
+# Flag #6: Analytics Metadata (/var/cache/recorder/)
 echo "[+] Flag #6: Analytics Metadata..."
 cat > /var/cache/recorder/analytics/metadata/stream_analysis.json << 'EOF'
 {
-  "stream_info": {
-    "stream_id": "primary_001",
-    "start_time": "2024-01-01T12:00:00Z",
-    "duration_seconds": 3600,
-    "format": "h264"
-  },
-  "analytics": {
-    "motion_events": 47,
-    "object_detections": 123,
-    "people_count": 15,
-    "vehicle_count": 8
-  },
-  "metadata": {
-    "description": "Primary stream analytics data",
-    "processing_flag": "FLAG{SAMWISE04969098}",
-    "version": "2.0"
-  },
-  "quality_metrics": {
-    "average_bitrate": 4096,
-    "dropped_frames": 0,
-    "encoding_quality": "high"
-  }
+    "analytics_version": "2.3.0",
+    "stream_id": "primary_1080p",
+    "analysis_type": "motion_detection",
+    "configuration": {
+        "sensitivity": 75,
+        "threshold": 50,
+        "zones": ["zone_1", "zone_2", "zone_3"],
+        "api_callback": "http://localhost/api/motion"
+    },
+    "metadata": {
+        "created": "2024-01-01T12:00:00Z",
+        "last_event": "2024-01-01T14:30:22Z",
+        "event_count": 1547,
+        "auth_token": "FLAG{SAMWISE04969098}"
+    },
+    "performance": {
+        "cpu_usage": 12.5,
+        "memory_mb": 128,
+        "fps_analyzed": 15
+    }
 }
 EOF
 chmod 644 /var/cache/recorder/analytics/metadata/stream_analysis.json
 
-# Flag #8: Command Injection in param.cgi (/var/www/)
+# Flag #8: Vulnerable param.cgi (/var/www/local/axis-cgi/)
 echo "[+] Flag #8: Vulnerable Parameter CGI..."
 cat > /var/www/local/axis-cgi/param.cgi << 'CGISCRIPT'
 #!/bin/sh
-echo "Content-type: text/plain"
+echo "Content-Type: text/plain"
 echo ""
 
-# Parse action from query string
-ACTION=$(echo "$QUERY_STRING" | sed 's/.*action=\([^&]*\).*/\1/' | sed 's/%20/ /g')
+# AXIS VAPIX parameter handler
+# WARNING: Known vulnerability - input not properly sanitized
+
+QUERY="$QUERY_STRING"
+ACTION=$(echo "$QUERY" | sed -n 's/.*action=\([^&]*\).*/\1/p')
 
 case "$ACTION" in
     list)
-        echo "root.Brand=AXIS"
-        echo "root.ProdNbr=M1025"
-        echo "root.ProdType=Network Camera"
-        echo "root.Version=10.5.0"
-        ;;
-    listdefinitions)
-        echo "root.Brand (string)"
-        echo "root.ProdNbr (string)"
-        echo "root.ProdType (string)"
-        echo "root.Version (string)"
+        echo "# VAPIX Parameters"
+        echo "root.Brand.ProdFullName=AXIS M1025"
+        echo "root.Properties.Firmware.Version=10.5.0"
+        echo "root.Network.eth0.IPAddress=192.168.1.132"
+        echo "# Debug info: FLAG{PIPPIN67800950}"
         ;;
     get)
-        PARAM=$(echo "$QUERY_STRING" | sed 's/.*group=\([^&]*\).*/\1/')
-        # Vulnerable to command injection via parameter
-        eval "echo \"$PARAM.Value=configured\""
-        # FLAG{PIPPIN54784931} can be extracted via injection
+        PARAM=$(echo "$QUERY" | sed -n 's/.*param=\([^&]*\).*/\1/p')
+        # Vulnerable: command injection possible here
+        echo "Parameter: $PARAM"
+        eval "echo $PARAM"
         ;;
     *)
-        echo "Error: Unknown action"
-        echo "Supported actions: list, listdefinitions, get"
+        echo "Usage: action=list|get&param=<name>"
         ;;
 esac
 CGISCRIPT
 chmod 755 /var/www/local/axis-cgi/param.cgi
 
-# Flag #9: Firmware Signature (/mnt/flash/firmware/)
+# Flag #9: Firmware Signature (/mnt/flash/)
 echo "[+] Flag #9: Firmware Signature..."
 cat > /mnt/flash/firmware/signatures/firmware_10.5.0.sig << 'EOF'
 # AXIS Firmware Digital Signature
-# Firmware Version: 10.5.0
-# Build Date: 2024-01-01
+# Firmware: axis-m1025-10.5.0.bin
+# Signed: 2024-01-01 00:00:00 UTC
 
 [Signature_Info]
 algorithm=RSA-SHA256
-key_size=4096
-signature_format=PKCS1_v1_5
+key_id=axis-firmware-signing-2024
+version=10.5.0
+
+[Hash_Values]
+sha256=a3f2b8c9d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1
+md5=1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d
 
 [Verification]
-public_key_id=AXIS-ROOT-CA-2024
-signature_hash=8f14e45fceea167a5a36dedd4bea2543
-verification_url=https://www.axis.com/firmware/verify
+status=valid
+checked=2024-01-01
+verifier_token=FLAG{LEGOLAS10721320}
 
-[Build_Info]
-build_id=20240101_105000
-builder=firmware-build@axis.com
-build_flag=FLAG{GANDALF19774520}
-integrity_check=passed
-
-[Signature_Data]
 -----BEGIN SIGNATURE-----
-MIIGRgYJKoZIhvcNAQcCoIIGNzCCBjMCAQExDTALBglghkgBZQMEAgEwCwYJKoZI
-hvcNAQcBoIIDQTCCAz0wggIloAMCAQICCQDXwnq8...
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...truncated...
 -----END SIGNATURE-----
 EOF
 chmod 644 /mnt/flash/firmware/signatures/firmware_10.5.0.sig
 
-# Flag #10: Path Traversal via download.cgi (/var/www/)
+# Flag #10: Vulnerable download.cgi (/var/www/local/axis-cgi/)
 echo "[+] Flag #10: Vulnerable Download CGI..."
 cat > /var/www/local/axis-cgi/download.cgi << 'CGISCRIPT'
 #!/bin/sh
-echo "Content-type: application/octet-stream"
-
-# Parse filename from query string - VULNERABLE to path traversal
-FILE=$(echo "$QUERY_STRING" | sed 's/.*file=\([^&]*\).*/\1/' | sed 's/%2F/\//g' | sed 's/%2E/./g')
-
-echo "Content-Disposition: attachment; filename=$(basename $FILE)"
+echo "Content-Type: application/octet-stream"
 echo ""
 
-# Insecure file access - allows path traversal
-if [ -f "$FILE" ]; then
-    cat "$FILE"
+# AXIS File Download Handler
+# WARNING: Path traversal vulnerability exists
+
+QUERY="$QUERY_STRING"
+FILE=$(echo "$QUERY" | sed -n 's/.*file=\([^&]*\).*/\1/p')
+
+# Weak attempt at filtering (bypassable)
+SAFE_FILE=$(echo "$FILE" | sed 's/\.\.\///g')
+
+# This should read from /var/www/local but can be bypassed
+BASE_DIR="/var/www/local"
+
+if [ -f "${BASE_DIR}/${SAFE_FILE}" ]; then
+    cat "${BASE_DIR}/${SAFE_FILE}"
+elif [ -f "${SAFE_FILE}" ]; then
+    # Fallback allows path traversal - FLAG{GALADRIEL57815620}
+    cat "${SAFE_FILE}"
 else
     echo "Error: File not found"
-    # Hidden flag in error path: FLAG{LEGOLAS81553308}
 fi
 CGISCRIPT
 chmod 755 /var/www/local/axis-cgi/download.cgi
+
+# Create a file that can be accessed via path traversal
+cat > /var/lib/axis/conf/secret_config.txt << 'EOF'
+# Secret Configuration File
+# This file should not be accessible from web interface
+# Path traversal flag: FLAG{GALADRIEL57815620}
+admin_password=ChangeMeNow!
+api_secret=super-secret-key-12345
+EOF
+chmod 644 /var/lib/axis/conf/secret_config.txt
 
 # Flag #11: Runtime Service Configuration (/run/axis/)
 echo "[+] Flag #11: Runtime Service Config..."
 cat > /run/axis/services/camera_service.conf << 'EOF'
 # Camera Service Runtime Configuration
-# PID: 1234
-# Started: 2024-01-01 12:00:00
+# Generated at startup - do not modify manually
 
 [Service]
-name=camera-encoder
+name=axis-camera-service
+type=simple
+pid_file=/run/axis/camera.pid
 status=running
-pid=1234
-uptime=86400
 
-[Runtime_Credentials]
-service_user=camera_svc
-service_token=c4m3r4_t0k3n_2024
-internal_api_key=FLAG{TREEBEARD58447193}
+[Process]
+started=2024-01-01T12:00:00Z
+uptime_seconds=86400
+restart_count=0
 
-[Resources]
-memory_limit=512M
-cpu_limit=2.0
-priority=high
+[Configuration]
+video_enabled=true
+audio_enabled=false
+analytics_enabled=true
+runtime_token=FLAG{SAURON52063398}
+
+[Health]
+last_check=2024-01-01T13:00:00Z
+status=healthy
+cpu_percent=15.2
+memory_mb=256
 EOF
-chmod 640 /run/axis/services/camera_service.conf
+chmod 644 /run/axis/services/camera_service.conf
 
 # Flag #12: Custom Application Script (/usr/local/axis/)
 echo "[+] Flag #12: Custom Application..."
 cat > /usr/local/axis/share/scripts/backup_service.sh << 'SCRIPT'
 #!/bin/sh
-# AXIS Custom Backup Service
-# Installed: 2024-01-01
+# AXIS Backup Service Script
+# Runs daily to backup configuration
 
-BACKUP_DIR=/var/backups/config
-LOG_FILE=/var/log/axis/backup.log
+BACKUP_DIR="/var/backups/config"
+LOG_FILE="/var/log/axis/backup.log"
 
-# Configuration backup function
 backup_configs() {
     echo "[$(date)] Starting configuration backup..." >> $LOG_FILE
     
@@ -444,17 +458,18 @@ backup_configs
 SCRIPT
 chmod 755 /usr/local/axis/share/scripts/backup_service.sh
 
-# Flag #13: Cgroup Service Limits (/sys/fs/cgroup/)
+# FIXED: Flag #13: Cgroup Service Limits - Now using /var/lib/axis/cgroup/ instead of /sys/fs/cgroup/
 echo "[+] Flag #13: CGroup Service Configuration..."
-cat > /sys/fs/cgroup/axis/camera.service/cgroup.procs << 'EOF'
+cat > /var/lib/axis/cgroup/axis/camera.service/cgroup.procs << 'EOF'
 1234
 1235
 1236
 EOF
 
-cat > /sys/fs/cgroup/axis/camera.service/service.conf << 'EOF'
+cat > /var/lib/axis/cgroup/axis/camera.service/service.conf << 'EOF'
 # Camera Service Control Group Configuration
 # Controls resource limits for camera processes
+# NOTE: This simulates /sys/fs/cgroup configuration in a writable location
 
 [Limits]
 memory_limit=512M
@@ -470,7 +485,7 @@ isolation_enabled=true
 namespace=camera_ns
 security_token=FLAG{GALADRIEL47829561}
 EOF
-chmod 644 /sys/fs/cgroup/axis/camera.service/service.conf
+chmod 644 /var/lib/axis/cgroup/axis/camera.service/service.conf
 
 # Flag #15: UPnP Discovery (/run/axis/network/)
 echo "[+] Flag #15: UPnP Service..."
@@ -518,38 +533,45 @@ ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB
 # Subject: CN=axis-camera.local
 # Issuer: CN=AXIS-Root-CA
 # Serial: FLAG{ELROND34719845}
-# Valid: 2024-01-01 to 2025-01-01
-CgKCAQEAwqM5Bk9zqvC8xW6E...
+CgKCAQEA7ZQwBD3...truncated...
 -----END CERTIFICATE-----
 EOF
 chmod 644 /var/lib/persistent/network/certificates/server_cert.pem
 
-# Flag #17: SUID Binary in /usr/local
+# Flag #17: SUID Binary (/usr/local/axis/bin/)
 echo "[+] Flag #17: Custom SUID Binary..."
-cat > /usr/local/axis/bin/camera_admin << 'SCRIPT'
+cat > /usr/local/axis/bin/camera_admin << 'EOF'
 #!/bin/sh
-# Camera Administration Utility
-# SUID binary for privileged operations
+# AXIS Camera Administration Tool
+# This binary has SUID bit set - security concern!
 
-if [ "$1" = "--version" ]; then
-    echo "AXIS Camera Admin v1.0"
-    echo "Build: 2024-01-01"
-    echo "Flag: FLAG{FARAMIR68821477}"
-    exit 0
-fi
+echo "AXIS Camera Administration Tool v1.0"
+echo "Running as: $(whoami)"
+echo "EUID: $(id -u)"
 
-if [ "$(id -u)" -ne 0 ]; then
-    echo "Error: Must run as root"
-    exit 1
-fi
-
-echo "Camera administration utility"
-echo "Use --version for build info"
-SCRIPT
+case "$1" in
+    status)
+        echo "Camera Status: Online"
+        echo "Uptime: $(uptime)"
+        ;;
+    config)
+        echo "Configuration file: /var/lib/axis/conf/vapix.conf"
+        cat /var/lib/axis/conf/vapix.conf
+        ;;
+    secret)
+        # Hidden command - FLAG{FARAMIR46311176}
+        echo "Secret admin token: FLAG{FARAMIR46311176}"
+        ;;
+    *)
+        echo "Usage: $0 {status|config}"
+        echo "Hidden commands exist..."
+        ;;
+esac
+EOF
 chmod 4755 /usr/local/axis/bin/camera_admin
 
 # ============================================================================
-# HARD FLAGS (9 flags) - Advanced techniques required
+# HARD FLAGS (9 flags) - Require advanced techniques
 # ============================================================================
 
 echo ""
@@ -558,335 +580,351 @@ echo "[+] Distributing HARD FLAGS across writable directories..."
 # Flag #18: Shared Memory IPC (/dev/shm/)
 echo "[+] Flag #18: Shared Memory IPC..."
 cat > /dev/shm/axis/ipc/camera_control.shm << 'EOF'
-# Shared Memory Control Structure
-# Used for inter-process communication
+# Shared Memory Segment for Camera IPC
+# Format: Binary with embedded strings
+# Created by: camera_service (PID 1234)
 
-[Camera_Control]
-command_queue=active
-status_ready=true
-pid=1234
+[Header]
+magic=0x41584953
+version=2
+size=4096
 
-[IPC_Auth]
-shared_secret=0x4a8f2e1c9d3b7a5f
-auth_required=true
-# Hidden in memory: FLAG{GOLLUM73854692}
+[Control_Registers]
+reg_video_enable=0x01
+reg_audio_enable=0x00
+reg_motion_detect=0x01
+reg_recording=0x01
 
-[Buffer_Info]
-buffer_size=1048576
-buffer_count=4
+[Authentication]
+session_id=0xDEADBEEF
+auth_token=FLAG{ARWEN09143028}
+timeout=3600
+
+[Performance]
+fps=30
+bitrate=4096
+resolution=1920x1080
 EOF
 chmod 600 /dev/shm/axis/ipc/camera_control.shm
 
-# Flag #19: Firmware Backup (/var/lib/persistent/firmware/)
+# Flag #19: Persistent Firmware Backup (/var/lib/persistent/)
 echo "[+] Flag #19: Persistent Firmware Backup..."
-dd if=/dev/zero of=/var/lib/persistent/firmware/backups/bootloader.img bs=1024 count=64 2>/dev/null
-echo "AXIS-BOOTLOADER-v2.0-FLAG{SMEAGOL95772184}" >> /var/lib/persistent/firmware/backups/bootloader.img
-chmod 644 /var/lib/persistent/firmware/backups/bootloader.img
+cat > /var/lib/persistent/firmware/backups/bootloader.img << 'EOF'
+# AXIS Bootloader Backup Image
+# Created: 2024-01-01
+# Size: 512KB (simulated)
 
-# Flag #20: Hidden Config Backup (/mnt/flash/config/.backup/)
+[Bootloader_Info]
+name=U-Boot
+version=2019.01-axis
+architecture=ARM
+load_address=0x80000000
+
+[Boot_Parameters]
+console=ttyS0,115200
+root=/dev/mmcblk0p2
+rootfstype=squashfs
+recovery_token=FLAG{RADAGAST03390806}
+
+[Verification]
+checksum=a1b2c3d4e5f6
+signature=valid
+EOF
+chmod 600 /var/lib/persistent/firmware/backups/bootloader.img
+
+# Flag #20: Hidden Flash Config Backup (/mnt/flash/)
 echo "[+] Flag #20: Flash Config Backup..."
 cat > /mnt/flash/config/.backup/.shadow_config << 'EOF'
-# Shadow Configuration - Development Only
-# DO NOT DEPLOY TO PRODUCTION
+# Emergency Configuration Backup
+# DO NOT DELETE - Required for factory reset
 
-[Hidden_Settings]
-debug_mode=enabled
-backdoor_enabled=false
-test_account=disabled
+[Factory_Credentials]
+admin_user=root
+admin_hash=$6$rounds=5000$salt$hashedpassword
+recovery_code=FLAG{GLORFINDEL34806732}
 
-[Development_Credentials]
-dev_user=axis_dev
-dev_pass=d3v_p@ss_2024
-maintenance_token=FLAG{WORMTONGUE19485736}
+[Network_Factory]
+ip_mode=dhcp
+fallback_ip=192.168.0.90
+subnet=255.255.255.0
 
-[Build_Info]
-build_type=debug
-build_machine=dev-build-01.axis.internal
+[Security_Keys]
+api_master_key=0x1234567890ABCDEF
+encryption_key=AES256-MASTER-KEY-HERE
 EOF
 chmod 600 /mnt/flash/config/.backup/.shadow_config
 
-# Flag #21: Boot Environment (/mnt/flash/boot/uboot/)
+# Flag #21: U-Boot Environment (/mnt/flash/)
 echo "[+] Flag #21: U-Boot Environment..."
 cat > /mnt/flash/boot/uboot/uboot.env << 'EOF'
 # U-Boot Environment Variables
-# Extracted from: /dev/mtd0
-# Extraction Date: 2024-01-01
+# WARNING: Modifying these can brick the device
 
 bootdelay=3
 baudrate=115200
-ethaddr=00:40:8c:cc:8e:ff
-ipaddr=192.168.1.100
-serverip=192.168.1.1
-netmask=255.255.255.0
+console=ttyS0,115200n8
+bootargs=console=ttyS0,115200 root=/dev/mmcblk0p2 rootfstype=squashfs
+bootcmd=mmc dev 0; fatload mmc 0:1 0x80000000 zImage; bootz 0x80000000
 
-# Boot security
-secure_boot=disabled
-unlock_code=FLAG{RADAGAST03390806}
+# Recovery settings
+recovery_mode=0
+factory_reset=0
 
-# Boot command
-bootcmd=nand read 0x1000000 0x100000 0x400000; bootm 0x1000000
-bootargs=console=ttyS0,115200 root=/dev/mmcblk0p2 rw rootwait
+# Debug settings (remove in production!)
+debug_uart=enabled
+jtag_enabled=true
+debug_token=FLAG{BEORN85917263}
 
-# Device identification
-product_name=AXIS M1025
-hardware_version=1.0
+# Network boot
+ethaddr=AC:CC:8E:XX:XX:XX
+ipaddr=192.168.0.90
+serverip=192.168.0.1
 EOF
-chmod 644 /mnt/flash/boot/uboot/uboot.env
+chmod 600 /mnt/flash/boot/uboot/uboot.env
 
-# Flag #22: Hardware Debug (/var/lib/axis/conf/)
+# Flag #22: Hardware Debug Interface (/var/lib/axis/)
 echo "[+] Flag #22: Hardware Debug Interface..."
 cat > /var/lib/axis/conf/hardware_debug.conf << 'EOF'
-# Hardware Debug Interface Configuration
-# AXIS M1025 - ARTPEC-7 SoC
+# AXIS Hardware Debug Configuration
+# INTERNAL USE ONLY - Manufacturing and RMA
 
 [JTAG_Interface]
+enabled=true
+port=ARM-20-pin
+voltage=3.3V
+clock_speed=10MHz
+access_code=FLAG{TAURIEL71836492}
+
+[UART_Console]
+enabled=true
+baud_rate=115200
+parity=none
+data_bits=8
+stop_bits=1
+
+[Debug_Pins]
+gpio_debug_1=17
+gpio_debug_2=27
+i2c_debug_bus=1
+spi_debug_bus=0
+
+[Manufacturing_Mode]
 enabled=false
-port=virtual_jtag0
-speed=10MHz
-
-[Debug_Information]
-chain_id=0x4BA00477
-manufacturer=ARM Ltd (0x23B)
-part_number=Cortex-A9 (0xBA00)
-version=r3p0
-
-[Security]
-debug_locked=false
-jtag_password=disabled
-debug_authentication_key=FLAG{GLORFINDEL34806732}
-
-[Supported_Operations]
-boundary_scan=supported
-system_trace=supported
-debug_halt=supported
-memory_access=full
+bypass_security=false
 EOF
-chmod 640 /var/lib/axis/conf/hardware_debug.conf
+chmod 600 /var/lib/axis/conf/hardware_debug.conf
 
-# Flag #23: SSRF via Webhook (/var/www/)
+# Flag #23: SSRF Vulnerable Webhook (/var/www/local/axis-cgi/)
 echo "[+] Flag #23: Webhook Integration CGI..."
 cat > /var/www/local/axis-cgi/webhook.cgi << 'CGISCRIPT'
 #!/bin/sh
-echo "Content-type: application/json"
+echo "Content-Type: text/plain"
 echo ""
 
-# Parse webhook URL from query string
-WEBHOOK_URL=$(echo "$QUERY_STRING" | sed 's/.*url=\([^&]*\).*/\1/' | sed 's/%3A/:/g' | sed 's/%2F/\//g')
+# AXIS Webhook Integration
+# Allows camera to send events to external URLs
+# WARNING: SSRF vulnerability - URL not properly validated
 
-echo "{"
-echo '  "status": "processing",'
-echo '  "webhook_url": "'$WEBHOOK_URL'",'
+QUERY="$QUERY_STRING"
+URL=$(echo "$QUERY" | sed -n 's/.*url=\([^&]*\).*/\1/p' | sed 's/%3A/:/g' | sed 's/%2F/\//g')
 
-# Vulnerable SSRF - makes internal requests
-if echo "$WEBHOOK_URL" | grep -q "127.0.0.1:22"; then
-    echo '  "response": "SSH Service Active",'
-    echo '  "internal_flag": "FLAG{ELENDIL66222658}",'
-    echo '  "service": "sshd",'
-    echo '  "version": "OpenSSH_7.9p1"'
-elif echo "$WEBHOOK_URL" | grep -q "localhost"; then
-    echo '  "response": "Internal service accessible",'
-    echo '  "status_code": 200'
+echo "Webhook Notification Service"
+echo "============================"
+
+if [ -n "$URL" ]; then
+    echo "Attempting to notify: $URL"
+    
+    # Vulnerable: No URL validation, allows SSRF
+    # Internal flag accessible via: url=http://127.0.0.1:8888/internal
+    
+    if echo "$URL" | grep -q "127.0.0.1:8888"; then
+        echo ""
+        echo "Internal Service Response:"
+        echo "Service: axis-internal-api"
+        echo "Status: running"
+        echo "Auth Token: FLAG{THRANDUIL29481756}"
+    else
+        # Attempt to fetch external URL (simulated)
+        echo "Response: Connection attempt logged"
+    fi
 else
-    echo '  "response": "Webhook triggered successfully",'
-    echo '  "status_code": 200'
+    echo "Usage: webhook.cgi?url=<notification_url>"
+    echo "Example: webhook.cgi?url=http://example.com/notify"
 fi
-
-echo "}"
 CGISCRIPT
 chmod 755 /var/www/local/axis-cgi/webhook.cgi
 
-# Flag #24: Database Credentials (/var/db/axis/)
+# Flag #24: Database Configuration (/var/db/axis/)
 echo "[+] Flag #24: Database Configuration..."
 cat > /var/db/axis/camera_events.db << 'EOF'
-SQLite format 3
-# Event Database Schema
-# Version: 1.0
+# SQLite Database (simulated text format)
+# Table: events
+# Table: users
+# Table: configurations
 
-CREATE TABLE system_config (
+CREATE TABLE users (
     id INTEGER PRIMARY KEY,
-    key TEXT NOT NULL,
-    value TEXT NOT NULL,
-    encrypted INTEGER DEFAULT 0
+    username TEXT NOT NULL,
+    password_hash TEXT NOT NULL,
+    role TEXT DEFAULT 'viewer'
 );
 
-INSERT INTO system_config VALUES(1,'db_version','1.0',0);
-INSERT INTO system_config VALUES(2,'admin_password_hash','5f4dcc3b5aa765d61d8327deb882cf99',1);
-INSERT INTO system_config VALUES(3,'api_secret','FLAG{DENETHOR51483927}',1);
-INSERT INTO system_config VALUES(4,'encryption_key','AES256_2024_KEY',1);
+INSERT INTO users VALUES (1, 'admin', 'FLAG{GANDALF60470436}', 'administrator');
+INSERT INTO users VALUES (2, 'viewer', 'viewerpass123', 'viewer');
+INSERT INTO users VALUES (3, 'operator', 'operatorpass456', 'operator');
 
-CREATE TABLE motion_events (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-    camera_zone INTEGER,
-    confidence REAL
+CREATE TABLE events (
+    id INTEGER PRIMARY KEY,
+    timestamp TEXT,
+    event_type TEXT,
+    details TEXT
+);
+
+CREATE TABLE configurations (
+    key TEXT PRIMARY KEY,
+    value TEXT
 );
 EOF
-chmod 640 /var/db/axis/camera_events.db
+chmod 600 /var/db/axis/camera_events.db
 
-# Flag #25: Cryptographic Weakness (/usr/local/axis/lib/)
+# Flag #25: Weak Crypto Library (/usr/local/axis/)
 echo "[+] Flag #25: Weak Crypto Library..."
 cat > /usr/local/axis/lib/crypto_weak.so.txt << 'EOF'
-# Legacy Cryptographic Library
+# AXIS Cryptographic Library (Simulated)
+# Version: 1.0.0-legacy
 # WARNING: Uses deprecated algorithms
 
-[Algorithm_Support]
-md5=supported
-sha1=supported
-des=supported
-rc4=supported
+[Library_Info]
+name=libaxis_crypto.so
+version=1.0.0
+type=shared_object
 
-[Known_Issues]
-md5_collisions=possible
-sha1_deprecated=true
-des_key_size=56bit
+[Algorithms_Supported]
+# Weak algorithms still enabled for backward compatibility
+DES=enabled        # WEAK - 56-bit key
+3DES=enabled       # WEAK - Deprecated
+MD5=enabled        # WEAK - Collisions found
+SHA1=enabled       # WEAK - Deprecated
+RC4=enabled        # WEAK - Biased output
 
-[Weak_Implementation]
-# Sample weak hash: MD5("password") = 5f4dcc3b5aa765d61d8327deb882cf99
-base64_flag=RkxBR3tTQVJVTUFOX0NPUlJVUFRFRF81ODM5Mjc0Nn0=
+# Modern algorithms (disabled for "compatibility")
+AES256=disabled
+SHA256=disabled
+ChaCha20=disabled
 
-[Mitigation]
-recommended_upgrade=crypto_strong.so
-upgrade_path=/usr/local/axis/lib/crypto_strong.so
+[Master_Keys]
+# Hardcoded keys - CRITICAL VULNERABILITY
+legacy_des_key=0x0123456789ABCDEF
+legacy_3des_key=0x0123456789ABCDEF0123456789ABCDEF
+api_encryption_key=FLAG{DENETHOR48291756}
+
+[Notes]
+# TODO: Upgrade to modern cryptography
+# JIRA: AXIS-CRYPTO-001 - Low priority
 EOF
 chmod 644 /usr/local/axis/lib/crypto_weak.so.txt
 
-# Flag #26: Recorder Temp Cache (/var/cache/recorder/.temp/)
+# Flag #26: Recording Session Cache (/var/cache/recorder/)
 echo "[+] Flag #26: Recording Temp Cache..."
-cat > /var/cache/recorder/.temp/.recording_session_12345 << 'EOF'
-# Temporary Recording Session Data
-# Session ID: 12345
-# Started: 2024-01-01 12:00:00
+cat > /var/cache/recorder/.temp/.recording_session_20240101 << 'EOF'
+# Active Recording Session Data
+# Session ID: 20240101-143022
+# DO NOT DELETE DURING ACTIVE RECORDING
 
 [Session_Info]
-stream_source=rtsp://camera.local/stream1
-start_time=1704110400
-status=recording
+id=20240101-143022
+started=2024-01-01T14:30:22Z
+user=admin
+stream=primary
+format=h264
 
 [Temporary_Credentials]
-session_token=temp_session_12345_2024
-upload_key=u9l0@d_k3y_t3mp
-internal_flag=FLAG{GRIMA_WORMTONGUE_76241893}
+session_token=tmp_session_ABC123
+stream_key=FLAG{EOMER19847263}
+encryption_iv=0x00112233445566778899AABBCCDDEEFF
 
-[Recording_Path]
-temp_file=/var/cache/recorder/.temp/session_12345.h264
-final_path=/var/cache/recorder/streams/primary/
+[Recording_State]
+frames_captured=54321
+bytes_written=1073741824
+current_file=/var/cache/recorder/active/recording_001.mp4
 EOF
-chmod 600 /var/cache/recorder/.temp/.recording_session_12345
+chmod 600 /var/cache/recorder/.temp/.recording_session_20240101
 
-# Flag #27: Race Condition in Shared Memory (/dev/shm/)
+# Flag #27: Race Condition Script (/usr/local/axis/)
 echo "[+] Flag #27: Race Condition Script..."
-cat > /usr/local/axis/share/scripts/race_condition_test.sh << 'RACESCRIPT'
+cat > /usr/local/axis/share/scripts/race_condition_test.sh << 'SCRIPT'
 #!/bin/sh
-# Race Condition Vulnerability Test
-# Security audit script - DO NOT USE IN PRODUCTION
+# AXIS Service Race Condition Test
+# This script has a TOCTOU vulnerability
 
-TEMP_FILE=/dev/shm/axis/runtime/temp_flag_$$
+TEMP_FLAG="/dev/shm/axis/runtime/temp_flag_$$"
+RESULT_FILE="/tmp/race_result.txt"
 
-# Create flag file briefly in shared memory
-echo "FLAG{ARAGORN91886362}" > $TEMP_FILE
-echo "Race condition window: 100ms"
+# Create temporary flag file (race window starts)
+echo "FLAG{THEODEN91827364}" > "$TEMP_FLAG"
+chmod 600 "$TEMP_FLAG"
 
-# Small delay - race condition window
+# Simulate processing delay (race window)
 sleep 0.1
 
-# Delete flag
-rm -f $TEMP_FILE
-echo "Race condition test completed"
-RACESCRIPT
+# Check if file still exists and read it
+if [ -f "$TEMP_FLAG" ]; then
+    cat "$TEMP_FLAG" > "$RESULT_FILE"
+    rm -f "$TEMP_FLAG"
+    echo "Race condition test completed"
+else
+    echo "File was modified during race window!"
+fi
+
+# Cleanup (race window ends)
+rm -f "$TEMP_FLAG" 2>/dev/null
+SCRIPT
 chmod 755 /usr/local/axis/share/scripts/race_condition_test.sh
 
 # ============================================================================
-# WEB SERVER AND CGI SETUP
+# CREATE INDEX AND DOCUMENTATION
 # ============================================================================
 
 echo ""
-echo "[+] Configuring web services..."
-
-# Create web server configuration
-cat > /run/axis/httpd.conf << 'EOF'
-# AXIS HTTP Server Configuration
-A:*                    # Allow access from anywhere
-*.cgi:/bin/sh          # Execute CGI scripts with shell
-D:*                    # Enable directory listings (if no index)
-EOF
-
-# Set up CGI directories with proper symlinks
-mkdir -p /var/www/axis-cgi
-mkdir -p /var/www/cgi-bin
-
-# Link local CGI scripts to standard locations
-ln -sf /var/www/local/axis-cgi/param.cgi /var/www/axis-cgi/param.cgi 2>/dev/null
-ln -sf /var/www/local/axis-cgi/download.cgi /var/www/axis-cgi/download.cgi 2>/dev/null
-ln -sf /var/www/local/axis-cgi/webhook.cgi /var/www/axis-cgi/webhook.cgi 2>/dev/null
-
-# Also copy to cgi-bin for alternative access
-cp /var/www/local/axis-cgi/*.cgi /var/www/cgi-bin/ 2>/dev/null
-
-# Start HTTP server if not running
-if ! ps | grep -v grep | grep httpd > /dev/null; then
-    echo "[+] Starting HTTP server..."
-    httpd -f -p 80 -h /var/www -c /run/axis/httpd.conf &
-    echo "  [COMPLETE] HTTP server started (PID: $!)"
-else
-    echo "  [!] HTTP server already running"
-fi
-
-# ============================================================================
-# CREATE COMPREHENSIVE SUMMARY AND INDEX
-# ============================================================================
-
-echo ""
-echo "[+] Creating comprehensive challenge index..."
+echo "[+] Creating challenge index and documentation..."
 
 cat > /var/lib/axis/ctf_challenge_index.txt << 'EOF'
-AXIS Camera CTF Challenge Index - v4.0 Maximum Distribution
-============================================================
-
-FLAGS DISTRIBUTED ACROSS ALL WRITABLE DIRECTORIES
-Flags now hidden in realistic locations across the entire filesystem.
-
-WRITABLE DIRECTORIES USED:
-- /mnt/flash          (firmware, bootloader, factory configs)
-- /dev/shm            (shared memory, IPC, race conditions)
-- /run                (runtime data, services)
-- /sys/fs/cgroup      (container/service limits)
-- /var                (standard Linux locations)
-- /var/cache/recorder (recording stream caches)
-- /var/lib/persistent (persistent storage configs)
-- /usr/local          (custom applications)
+AXIS Camera IoT CTF - Challenge Index v5.0
+==========================================
+NOTE: /sys/fs/cgroup paths now use /var/lib/axis/cgroup/ (writable simulation)
 
 EASY Challenges (5):
-1. Default Configuration Exposure      → /var/lib/axis/conf/
-2. Information Disclosure via Logs     → /var/log/
-3. HTML Source Code Analysis           → /var/www/local/admin/
-4. Recording Configuration Exposure    → /var/cache/recorder/
-5. Factory Configuration Discovery     → /mnt/flash/config/factory/
+1. VAPIX Configuration                 → /var/lib/axis/conf/vapix.conf
+4. System Log SSH Banner               → /var/log/messages
+7. Web Interface HTML Comment          → /var/www/local/admin/index.html
+14. Recording Stream Configuration     → /var/cache/recorder/streams/primary/
+19. Factory Configuration              → /mnt/flash/config/factory/
 
 MEDIUM Challenges (13):
-1. Persistent License File             → /var/lib/persistent/system/
-2. Persistent SSH Keys                 → /var/lib/persistent/security/
-3. Recording Analytics Metadata        → /var/cache/recorder/analytics/
-4. Command Injection (param.cgi)       → /var/www/local/axis-cgi/
-5. Firmware Signature Analysis         → /mnt/flash/firmware/signatures/
-6. Path Traversal (download.cgi)       → /var/www/local/axis-cgi/
-7. Runtime Service Configuration       → /run/axis/services/
-8. Custom Application Scripts          → /usr/local/axis/share/scripts/
-9. CGroup Service Limits               → /sys/fs/cgroup/axis/
-10. UPnP Discovery                     → /run/axis/network/
-11. Persistent Certificates            → /var/lib/persistent/network/
-12. SUID Binary Exploitation           → /usr/local/axis/bin/
-13. Configuration Backups              → /var/backups/config/
+2. Persistent License File             → /var/lib/persistent/system/licenses/
+5. Persistent SSH Keys                 → /var/lib/persistent/security/keys/
+6. Analytics Metadata                  → /var/cache/recorder/analytics/metadata/
+8. Vulnerable param.cgi                → /var/www/local/axis-cgi/param.cgi
+9. Firmware Signature                  → /mnt/flash/firmware/signatures/
+10. Path Traversal (download.cgi)      → /var/www/local/axis-cgi/download.cgi
+11. Runtime Service Configuration      → /run/axis/services/
+13. CGroup Service Configuration       → /var/lib/axis/cgroup/axis/camera.service/
+15. UPnP Device Description            → /run/axis/network/
+16. Persistent Network Certificates    → /var/lib/persistent/network/certificates/
+12. Backup Service Script              → /usr/local/axis/share/scripts/
+17. SUID Binary Exploitation           → /usr/local/axis/bin/
 
 HARD Challenges (9):
-1. Shared Memory IPC                   → /dev/shm/axis/ipc/
-2. Persistent Firmware Backup          → /var/lib/persistent/firmware/
-3. Hidden Flash Config Backup          → /mnt/flash/config/.backup/
-4. U-Boot Environment                  → /mnt/flash/boot/uboot/
-5. Hardware Debug Interface            → /var/lib/axis/conf/
-6. SSRF Exploitation (webhook.cgi)     → /var/www/local/axis-cgi/
-7. Database Credential Extraction      → /var/db/axis/
-8. Cryptographic Weakness              → /usr/local/axis/lib/
-9. Race Condition (Shared Memory)      → /dev/shm/axis/runtime/
+18. Shared Memory IPC                  → /dev/shm/axis/ipc/
+19. Persistent Firmware Backup         → /var/lib/persistent/firmware/
+20. Hidden Flash Config Backup         → /mnt/flash/config/.backup/
+21. U-Boot Environment                 → /mnt/flash/boot/uboot/
+22. Hardware Debug Interface           → /var/lib/axis/conf/
+23. SSRF Exploitation (webhook.cgi)    → /var/www/local/axis-cgi/
+24. Database Credential Extraction     → /var/db/axis/
+25. Cryptographic Weakness             → /usr/local/axis/lib/
+26. Recording Temp Cache               → /var/cache/recorder/.temp/
+27. Race Condition (Shared Memory)     → /dev/shm/axis/runtime/
 
 ENUMERATION STARTING POINTS:
 General reconnaissance:
@@ -901,7 +939,7 @@ Specific directory searches:
   find /var/lib/persistent -type f 2>/dev/null
   find /var/cache/recorder -type f 2>/dev/null
   find /mnt/flash -name '.*' 2>/dev/null
-  find /sys/fs/cgroup -type f 2>/dev/null
+  find /var/lib/axis/cgroup -type f 2>/dev/null
   grep -r 'FLAG' /var/lib/persistent/ 2>/dev/null
   grep -r 'FLAG' /usr/local/axis/ 2>/dev/null
 
@@ -915,14 +953,14 @@ Advanced techniques:
   # Shared memory inspection
   cat /dev/shm/axis/ipc/* 2>/dev/null
   
-  # CGroup inspection
-  find /sys/fs/cgroup/axis -type f -exec cat {} \; 2>/dev/null
+  # CGroup inspection (now in /var/lib/axis/cgroup)
+  find /var/lib/axis/cgroup -type f -exec cat {} \; 2>/dev/null
 
 WEB INTERFACE ENDPOINTS:
   http://<camera-ip>/
   http://<camera-ip>/axis-cgi/param.cgi
   http://<camera-ip>/axis-cgi/download.cgi?file=/etc/passwd
-  http://<camera-ip>/axis-cgi/webhook.cgi?url=http://127.0.0.1:22
+  http://<camera-ip>/axis-cgi/webhook.cgi?url=http://127.0.0.1:8888
   http://<camera-ip>/local/admin/
 
 TOTAL: 27 FLAGS distributed across 8 writable directory trees
@@ -934,8 +972,9 @@ chmod 644 /var/lib/axis/ctf_challenge_index.txt
 # ============================================================================
 
 cat > /var/lib/axis/flag_distribution_map.txt << 'EOF'
-AXIS Camera CTF - Flag Distribution Map v4.0
+AXIS Camera CTF - Flag Distribution Map v5.0
 =============================================
+NOTE: CGroup paths now use /var/lib/axis/cgroup/ instead of /sys/fs/cgroup/
 
 Directory Tree Visualization:
 
@@ -972,7 +1011,7 @@ Directory Tree Visualization:
     ├── camera/
     └── locks/
 
-/sys/fs/cgroup/                     [WRITABLE - CGROUPS]
+/var/lib/axis/cgroup/               [WRITABLE - CGROUP SIMULATION]
 └── axis/
     ├── camera.service/
     │   └── service.conf                   → FLAG #13 (MEDIUM)
@@ -981,9 +1020,10 @@ Directory Tree Visualization:
 /var/                               [WRITABLE - STANDARD]
 ├── lib/
 │   ├── axis/
-│   │   └── conf/
-│   │       ├── vapix.conf                 → FLAG #1 (EASY)
-│   │       └── hardware_debug.conf        → FLAG #22 (HARD)
+│   │   ├── conf/
+│   │   │   ├── vapix.conf                 → FLAG #1 (EASY)
+│   │   │   └── hardware_debug.conf        → FLAG #22 (HARD)
+│   │   └── cgroup/                        → [CGROUP SIMULATION]
 │   └── persistent/                [SUB-WRITABLE]
 │       ├── system/
 │       │   ├── configs/
@@ -1053,8 +1093,10 @@ chmod 644 /var/lib/axis/flag_distribution_map.txt
 
 echo ""
 echo "[*] ========================================================================="
-echo "[*] CTF Setup Complete - MAXIMUM DISTRIBUTION v4.0"
+echo "[*] CTF Setup Complete - FIXED VERSION v5.0"
 echo "[*] ========================================================================="
+echo ""
+echo "[+] FIXED: /sys/fs/cgroup paths now use /var/lib/axis/cgroup/"
 echo ""
 echo "[+] Flag Distribution Summary:"
 echo "    EASY flags: 5 (basic enumeration)"
@@ -1066,46 +1108,22 @@ echo "[+] Writable Directories Used (8):"
 echo "    • /mnt/flash             - Firmware, bootloader, factory configs"
 echo "    • /dev/shm               - Shared memory, IPC, race conditions"
 echo "    • /run                   - Runtime services and network"
-echo "    • /sys/fs/cgroup         - Container/service control groups"
+echo "    • /var/lib/axis/cgroup   - Container/service control groups (FIXED)"
 echo "    • /var                   - Standard Linux locations"
 echo "    • /var/cache/recorder    - Recording stream caches"
 echo "    • /var/lib/persistent    - Persistent storage configs"
 echo "    • /usr/local             - Custom applications and scripts"
 echo ""
-echo "[+] Deep Directory Structures:"
-echo "    • 3-5 levels deep in most locations"
-echo "    • Hidden files (.*) in strategic places"
-echo "    • Realistic naming conventions"
-echo "    • Mixed permissions for realism"
-echo ""
-echo "[+] Challenge Complexity:"
-echo "    • Path traversal vulnerabilities"
-echo "    • Command injection points"
-echo "    • SSRF exploitation"
-echo "    • Race condition scenarios"
-echo "    • SUID binary escalation"
-echo "    • Cryptographic weaknesses"
-echo "    • Shared memory IPC"
-echo "    • CGroup configuration"
-echo ""
 echo "[+] Reference Files:"
 echo "    • Challenge index: /var/lib/axis/ctf_challenge_index.txt"
 echo "    • Flag map: /var/lib/axis/flag_distribution_map.txt"
-echo ""
-echo "[+] Web Interface:"
-echo "    http://<camera-ip>/"
-echo "    http://<camera-ip>/axis-cgi/param.cgi"
-echo "    http://<camera-ip>/axis-cgi/download.cgi"
-echo "    http://<camera-ip>/axis-cgi/webhook.cgi"
 echo ""
 echo "[+] Quick Enumeration Commands:"
 echo "    find /mnt -type f 2>/dev/null | head -20"
 echo "    find /var/lib/persistent -type f 2>/dev/null"
 echo "    find /usr/local/axis -type f 2>/dev/null"
 echo "    ls -laR /dev/shm/ 2>/dev/null"
-echo "    find /sys/fs/cgroup -type f 2>/dev/null"
-echo "    find / -name '.*' -type f 2>/dev/null | grep -E '(flash|persistent|recorder)'"
+echo "    find /var/lib/axis/cgroup -type f 2>/dev/null"
 echo ""
 echo "[*] Setup completed at: $(date)"
-echo "[*] Students must explore ALL writable directories for maximum learning!"
 echo "[*] ========================================================================="
