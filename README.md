@@ -8,12 +8,12 @@ cd scripts
 # "Cat" the script in the terminal send the output to the /tmp folder on the AXIS camera
 cat vulnaxis.sh | ssh root@192.168.1.132 "cat › /tmp/vulnaxis.sh"
 
-*****★★★★★★★*********★*★*★************★
+***************************************
 * AXIS Camera SSH Service
 * Firmware: 10.5.0
 Places
 * Device ID: ********
-★★★★★★★★★★★★★★★*★★★★★★★★★★*★★★★★★★★★★★★
+***************************************
 
 root@192.168.1.132's password:
 
@@ -21,11 +21,11 @@ root@192.168.1.132's password:
 # SSH into the AXIS camera
 ssh root@192.168.1.132
 
-★★★★*★★★★★★★★★★★★★★★★★★★★★★★★★★
+***************************************
 * AXIS Camera SSH Service
 * Firmware: 10.5.0
 * Device ID: ********
-*******************************
+***************************************
 
 root@192.168.1.132's password:
 
