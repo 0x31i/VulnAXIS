@@ -108,7 +108,7 @@ cat file | tr 'A-Za-z' 'N-ZA-Mn-za-m'  # ROT13
 sqlite3 /var/db/axis/camera.db ".tables"
 
 # Binary string extraction
-strings /usr/local/axis/bin/service | grep -i "flag\|key\|pass"
+strings /usr/local/axis/bin/service | grep -i "key\|pass"
 ```
 
 #### Hard Flags (Advanced Techniques)
@@ -130,7 +130,7 @@ ls -la /dev/shm/axis/
 while true; do ls /dev/shm/axis/runtime/ 2>/dev/null; done
 
 # Bootloader analysis
-cat /mnt/flash/boot/uboot/uboot.env | grep -i flag
+cat /mnt/flash/boot/uboot/uboot.env
 ```
 
 ---
@@ -461,15 +461,6 @@ Jan 27 10:15:25 axis-camera httpd[1235]: BusyBox httpd started
 Jan 27 10:15:26 axis-camera rtspd[1236]: RTSP server ready
 ```
 
-**Alternate Search Method**:
-```bash
-# Search for flag pattern
-grep -i "flag{" /var/log/messages
-
-# View last 100 lines
-tail -100 /var/log/messages | grep -i flag
-```
-
 **Why This Flag is Easy**:
 - Standard log file location
 - Clear flag in plain text
@@ -565,12 +556,6 @@ require_auth = false
 [recording]
 enabled = true
 retention_days = 7
-```
-
-**Alternate Discovery**:
-```bash
-# Search entire cache directory
-find /var/cache/recorder/ -type f -exec grep -l "FLAG{" {} \;
 ```
 
 **Why This Flag is Easy**:
@@ -811,9 +796,6 @@ cat stream_analysis.json
 **Parsing Methods**:
 
 ```bash
-# Using grep (basic)
-grep -i "flag{" stream_analysis.json
-
 # Using jq (if available)
 cat stream_analysis.json | jq '.analysis.metadata.api_key'
 
@@ -1349,7 +1331,7 @@ SELECT * FROM events WHERE event_type = 'admin_access';
 **If sqlite3 is NOT available** (typical for BusyBox):
 ```bash
 # Read raw database file
-strings camera_events.db | grep -i "flag{"
+strings camera_events.db
 ```
 
 **Why This Flag is Medium**:
@@ -1429,13 +1411,10 @@ cat camera_control.shm
 
 ```bash
 # Method 1: Strings extraction
-strings camera_control.shm | grep -i flag
+strings camera_control.shm 
 
 # Method 2: Hexdump with ASCII
-hexdump -C camera_control.shm | grep -i flag
-
-# Method 3: Direct grep (works for text in binary)
-grep -a "FLAG{" camera_control.shm
+hexdump -C camera_control.shm 
 ```
 
 **Why This Flag is Hard**:
@@ -1487,10 +1466,10 @@ bootloader.img: data
 strings bootloader.img | head -50
 
 # Search for flag pattern
-strings bootloader.img | grep -i "flag{"
+strings bootloader.img
 
 # Hexdump analysis
-hexdump -C bootloader.img | grep -A2 -B2 "FLAG"
+hexdump -C bootloader.img
 ```
 
 **Expected Strings Output**:
@@ -1925,7 +1904,7 @@ This flag requires exploiting a race condition where a script creates a temporar
 **Step 1: Identify the race-prone script**
 ```bash
 # Find scripts that use temp files
-find /usr/local/axis/share/scripts/ -type f -exec grep -l "temp_flag" {} \;
+find /usr/local/axis/share/scripts/ -type f -exec grep -l "temp" {} \;
 
 # Expected: /usr/local/axis/share/scripts/camera_init.sh
 ```
@@ -1952,27 +1931,7 @@ rm -f /dev/shm/axis/runtime/temp_flag_$$
 
 **Step 3: Exploit the race condition**
 
-**Method A: Continuous monitoring**
-```bash
-# Monitor directory continuously in background
-while true; do
-    ls /dev/shm/axis/runtime/temp_flag_* 2>/dev/null && \
-    cat /dev/shm/axis/runtime/temp_flag_* 2>/dev/null
-    sleep 0.01
-done
-```
-
-**Method B: Inotify monitoring** (if available)
-```bash
-# Watch for file creation
-inotifywait -m -e create /dev/shm/axis/runtime/ | while read path action file; do
-    if echo "$file" | grep -q "temp_flag"; then
-        cat "$path/$file"
-    fi
-done
-```
-
-**Method C: Trigger and capture**
+**Trigger and capture**
 ```bash
 # Terminal 1: Start monitoring
 while true; do cat /dev/shm/axis/runtime/temp_flag_* 2>/dev/null; done
