@@ -2019,7 +2019,7 @@ drwxr-xr-x 3 root root 4096 Apr 15  2021 ..
 
 ```bash
 # Extract readable strings from the binary
-strings /var/lib/persistent/firmware/backups/bootloader.img | grep -i "flag\|password\|key\|token\|access" | head -20
+strings /var/lib/persistent/firmware/backups/bootloader.img | grep -i "password\|key\|token\|access" | head -20
 ```
 
 **Output:**
