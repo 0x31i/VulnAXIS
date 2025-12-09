@@ -138,6 +138,26 @@ rm -f /var/log/messages
 
 ---
 
+## Web-based Setup
+
+- Navigate to http://192.168.1.132/ and login using the default credentials "root:pass"
+- Select the "SETUP" option from the top right menu.
+- Then, navigate to: Video -> Overlay Image
+- Upload the "hpcreds.bmp" file from this github project using the file upload button.
+- Then, select the uploaded image from the "Use overlay image" dropdown menu.
+- Click "SAVE"
+- Next, navigate to: System Options -> Network -> TCP/IP -> Advanced
+- Select the RTSP and FTP (optional for additional exploration) options to ensure they have a blue checkmark.
+- Click "SAVE"
+- Next, navigate to System Options -> Network -> SNMP
+- Select the "Enable SNMP v1" and "Enable SNMP v2c" options to ensure they have a blue checkmark.
+- Click "SAVE"
+- Next, navigate to System Options -> Network -> UPnP
+- Select the UPnP option to ensure there is a blue checkmark.
+- Click "SAVE"
+
+---
+
 ## Troubleshooting
 
 ### Script Fails to Execute
