@@ -317,7 +317,7 @@ case "$ACTION" in
         echo "# VAPIX Parameters"
         echo "root.Brand.ProdFullName=AXIS M1025"
         echo "root.Properties.Firmware.Version=10.5.0"
-        echo "root.Network.eth0.IPAddress=192.168.1.132"
+        echo "root.Network.eth0.IPAddress=192.168.148.105"
         echo "# Debug info: FLAG{PIPPIN67800950}"
         ;;
     get)
@@ -645,7 +645,7 @@ recovery_code=FLAG{GLORFINDEL34806732}
 
 [Network_Factory]
 ip_mode=dhcp
-fallback_ip=192.168.0.90
+fallback_ip=192.168.148.105
 subnet=255.255.255.0
 
 [Security_Keys]
@@ -677,7 +677,7 @@ debug_token=FLAG{BEORN85917263}
 
 # Network boot
 ethaddr=AC:CC:8E:XX:XX:XX
-ipaddr=192.168.0.90
+ipaddr=192.168.148.105
 serverip=192.168.0.1
 EOF
 chmod 600 /mnt/flash/boot/uboot/uboot.env
