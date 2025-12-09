@@ -1961,6 +1961,10 @@ while true; do cat /dev/shm/axis/runtime/temp_flag_* 2>/dev/null; done
 
 #### Common Student Challenges
 
+**Challenge 0**: "Some flags are not in their proper locations"
+- **Solution**: Rerun the "vulnaxis.sh" script.
+- Sometimes if the AXIS security camera is unexpectedly shut down, the flags get erased.
+
 **Challenge 1**: "I don't know where to start"
 - **Solution**: Teach systematic enumeration framework
 - Start with vendor directory: `/var/lib/axis/`
