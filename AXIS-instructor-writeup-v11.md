@@ -16,8 +16,8 @@
 ## Challenge Overview
 
 **Target System**: AXIS Network Camera (Embedded Linux/BusyBox)  
-**IP Address**: 192.168.148.103 
-**Attacker System**: Kali Linux 192.168.xxx.xxx  
+**IP Address**: 192.168.148.103  
+**Attacker System**: Kali Linux 192.168.1.133  
 **Total Flags**: 27 (5 Easy, 13 Medium, 9 Hard)  
 **Access Method**: SSH with default credentials (root:pass)  
 **Writable Directories**: `/var/lib/axis/`, `/mnt/flash/`, `/dev/shm/`, `/run/`, `/tmp/`, `/var/cache/`  
@@ -192,7 +192,7 @@ ping -c 4 192.168.148.103
 
 **Expected Output**:
 ```
-PING 192.168.148.103(192.168.148.103) 56(84) bytes of data.
+PING 192.168.148.103 (192.168.148.103) 56(84) bytes of data.
 64 bytes from 192.168.148.103: icmp_seq=1 ttl=64 time=0.428 ms
 64 bytes from 192.168.148.103: icmp_seq=2 ttl=64 time=0.392 ms
 64 bytes from 192.168.148.103: icmp_seq=3 ttl=64 time=0.401 ms
@@ -208,10 +208,10 @@ PING 192.168.148.103(192.168.148.103) 56(84) bytes of data.
 
 ```bash
 # Quick service discovery
-sudo nmap -sS -sV -T4 192.168.148.103-oN scans/quick.txt
+sudo nmap -sS -sV -T4 192.168.148.103 -oN scans/quick.txt
 
 # Comprehensive scan
-sudo nmap -sS -sV -sC -p- -T4 192.168.148.103-oN scans/full.txt
+sudo nmap -sS -sV -sC -p- -T4 192.168.148.103 -oN scans/full.txt
 ```
 
 **Expected Results**:
@@ -233,12 +233,12 @@ PORT     STATE SERVICE    VERSION
 
 ```bash
 # Grab SSH banner
-nc -nv 192.168.148.10322
+nc -nv 192.168.148.103 22
 ```
 
 **Output**:
 ```
-Connection to 192.168.148.10322 port [tcp/*] succeeded!
+Connection to 192.168.148.103 22 port [tcp/*] succeeded!
 SSH-2.0-OpenSSH_7.4
 *************************************************
 * AXIS Camera SSH Service                      *
