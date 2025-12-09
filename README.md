@@ -102,7 +102,7 @@ cat /var/log/messages | grep FLAG
 
 ## Manual Web-based Setup (required)
 
-- Navigate to http://192.168.1.132/ and login using the default credentials "root:pass"
+- Navigate to http://192.168.148.103/ and login using the default credentials "root:pass"
 - Select the "SETUP" option from the top right menu.
 - Then, navigate to: Video -> Overlay Image
 - Upload the "hpcreds.bmp" file from this github project using the file upload button.
@@ -127,7 +127,7 @@ cat /var/log/messages | grep FLAG
 ### Web Services
 ```bash
 # Test HTTP access
-curl http://192.168.1.132/
+curl http://192.168.148.103/
 ```
 
 ### File System Enumeration
