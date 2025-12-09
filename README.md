@@ -36,13 +36,13 @@ CTF lab environment with 27 flags distributed across a realistic AXIS camera fil
 ## Quick Setup
 
 ### Step 0: Configure Access
+##### **Upon a fresh reset, there may be a prompt requesting a username and password to be created. Always use root:pass**
 
 **Default Credentials:**
 ```
 Username: root
 Password: pass
 ```
-##### **Upon a fresh reset, there may be a prompt requesting a username and password to be created. Always use root:pass**
 
 ### Step 1: Transfer Script to Camera
 
