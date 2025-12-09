@@ -35,6 +35,15 @@ CTF lab environment with 27 flags distributed across a realistic AXIS camera fil
 
 ## Quick Setup
 
+### Step 0: Configure Access
+
+**Default Credentials:**
+```
+Username: root
+Password: pass
+```
+##### **Upon a fresh reset, there may be a prompt requesting a username and password to be created. Always use root:pass**
+
 ### Step 1: Transfer Script to Camera
 
 ```bash
@@ -87,26 +96,6 @@ find /var/cache/recorder -type f 2>/dev/null | wc -l
 # Quick flag check (should show flags)
 grep -r "FLAG{" /var/lib/axis/conf/ 2>/dev/null | head -3
 cat /var/log/messages | grep FLAG
-```
-
-### Step 4: Configure Access
-
-**Default Credentials:**
-```
-Username: root
-Password: pass
-```
-
-**SSH Access:**
-```bash
-ssh root@192.168.148.103
-# Password: pass
-```
-
-**Web Interface:**
-```
-http://192.168.148.103
-https://192.168.148.103
 ```
 
 ---
