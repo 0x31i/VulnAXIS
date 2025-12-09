@@ -17,7 +17,7 @@
 
 **Target System**: AXIS Network Camera (Embedded Linux/BusyBox)  
 **IP Address**: 192.168.148.103  
-**Attacker System**: Kali Linux 192.168.1.133  
+**Attacker System**: Kali Linux 192.168.xxx.xxx 
 **Total Flags**: 27 (5 Easy, 13 Medium, 9 Hard)  
 **Access Method**: SSH with default credentials (root:pass)  
 **Writable Directories**: `/var/lib/axis/`, `/mnt/flash/`, `/dev/shm/`, `/run/`, `/tmp/`, `/var/cache/`  
