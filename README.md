@@ -13,7 +13,7 @@ CTF lab environment with 27 flags distributed across a realistic AXIS camera fil
 - **Target Device**: AXIS M1025 Network Camera (or compatible Linux system)
 - **Firmware Version**: 10.5.0
 - **Total Flags**: 27 (5 Easy, 13 Medium, 9 Hard)
-- **Flag Format**: `FLAG{POKEMON_NAME#########}`
+- **Flag Format**: `FLAG{NAME#########}`
 - **Shell**: POSIX-compliant (BusyBox ash compatible)
 
 ---
